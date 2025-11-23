@@ -27,7 +27,7 @@ interface ApiService {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:5000/"
+    private const val BASE_URL = "https://server-for-ai-image-app.onrender.com/"
 
     val api: ApiService by lazy {
         Retrofit.Builder()

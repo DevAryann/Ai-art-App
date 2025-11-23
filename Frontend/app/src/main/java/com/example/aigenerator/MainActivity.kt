@@ -1,30 +1,28 @@
-package com.example.aigenerator // Keep your actual package name here!
+package com.example.aigenerator
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.* // Material Design 3 components
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import kotlinx.coroutines.launch
-import coil.ImageLoader
-import coil.request.ImageRequest
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import coil.ImageLoader
 import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import com.example.aigenerator.data.FirestoreRepository
 import com.example.aigenerator.ui.theme.AiGeneratorTheme
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
@@ -32,9 +30,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // USE YOUR CUSTOM THEME HERE
             AiGeneratorTheme {
-                // A Surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -46,22 +42,34 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// Initialize the repository (Database Connection)
+val repository = FirestoreRepository()
+
 @Composable
 fun MainScreen() {
+    // 1. FETCH DATA: Watch the "prompts" list from our database
+    val promptList by repository.prompts.collectAsState()
+
+    // 2. TRIGGER FETCH: When app opens, get data from Firestore immediately
+    LaunchedEffect(Unit) {
+        repository.fetchPrompts()
+    }
 
     val context = LocalContext.current
+
+    // Custom Image Loader with 30s Timeout for AI
     val imageLoader = remember {
         ImageLoader.Builder(context)
             .okHttpClient {
                 OkHttpClient.Builder()
-                    // Increase timeout to 30 seconds
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
+                    .connectTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
                     .build()
             }
             .build()
     }
-    // State variables to control the UI
+
+    // State variables
     var promptText by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -76,65 +84,92 @@ fun MainScreen() {
     ) {
         Text(
             text = "AI Art Generator",
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // The Image Display Area
+        // --- IMAGE DISPLAY AREA ---
         Card(
             modifier = Modifier
                 .size(300.dp)
                 .clip(RoundedCornerShape(16.dp)),
-            elevation = CardDefaults.cardElevation(8.dp)
+            elevation = CardDefaults.cardElevation(8.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 if (imageUrl.isNotEmpty()) {
-                    // 🔴 SWITCH TO SUBCOMPOSE ASYNC IMAGE
                     SubcomposeAsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(imageUrl)
                             .crossfade(true)
                             .build(),
-                        imageLoader = imageLoader, // Keep your 30s timeout loader!
+                        imageLoader = imageLoader,
                         modifier = Modifier.fillMaxSize(),
                         contentDescription = "Generated AI Image",
-
-                        // 1. DEFINE THE LOADING STATE
-                        loading = {
-                            NeonLoadingAnimation() // <--- Your new cool animation
-                        },
-
-                        // 2. DEFINE THE ERROR STATE
-                        error = {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text("Failed to load", color = Color.Red)
-                            }
-                        }
+                        loading = { NeonLoadingAnimation() },
+                        error = { Text("Failed to load", color = Color.Red) }
                     )
                 } else {
-                    // This is the state BEFORE you click generate
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        // You can put an icon here if you want
-                        Text(
-                            "Your art will appear here",
-                            color = Color.Gray
-                        )
+                        Text("Your art will appear here", color = Color.Gray)
                     }
                 }
 
-                // OPTIONAL: If you want the animation to play while the SERVER is thinking
-                // (Before Coil even gets the URL), you can overlay it here:
                 if (isLoading && imageUrl.isEmpty()) {
                     NeonLoadingAnimation()
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- NEW FEATURE: VIRAL PROMPTS SCROLL BAR ---
+        // Only show this if we actually have data from Firebase
+        if (promptList.isNotEmpty()) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "TRY THESE VIRAL PROMPTS:",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+                )
+
+                // The Horizontal Scroll List
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(promptList) { prompt ->
+                        AssistChip(
+                            onClick = {
+                                // When clicked, AUTO-FILL the text box!
+                                promptText = prompt.Text
+                            },
+                            label = { Text(prompt.category) },
+                            leadingIcon = {
+                                // Add a tiny icon for style
+                                Icon(
+                                    imageVector = androidx.compose.material.icons.Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        // -------------------------------------------
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // User Input
         OutlinedTextField(
@@ -156,18 +191,12 @@ fun MainScreen() {
                     isLoading = true
                     coroutineScope.launch {
                         try {
-                            println("DEBUG_APP: Sending request to server...") // 1. Did we start?
-
+                            println("DEBUG_APP: Sending request to server...")
                             val request = GenerateRequest(prompt = promptText)
                             val response = RetrofitClient.api.generateImage(request)
-
-                            // 2. DID WE GET A URL?
-                            println("DEBUG_APP: Success! Server sent this URL: ${response.image_url}")
-
+                            println("DEBUG_APP: Success! URL: ${response.image_url}")
                             imageUrl = response.image_url
-
                         } catch (e: Exception) {
-                            // 3. OR DID WE CRASH?
                             println("DEBUG_APP: ERROR - ${e.message}")
                             e.printStackTrace()
                         } finally {
@@ -176,14 +205,7 @@ fun MainScreen() {
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
-
+            modifier = Modifier.fillMaxWidth()
         )
     }
-}
-
-@Preview
-@Composable
-fun MainScreenPreview() {
-    MainScreen()
 }
