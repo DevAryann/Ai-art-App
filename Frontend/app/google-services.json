@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "299061567454",
+    "project_id": "ai-image-gen-d0435",
+    "storage_bucket": "ai-image-gen-d0435.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:299061567454:android:c2bb2696726b46d056474f",
+        "android_client_info": {
+          "package_name": "com.example.aigenerator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6pVJHK47IB8xXyUn56z1u1_V0anwGcq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

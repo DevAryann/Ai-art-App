@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.aigenerator" />
+                  <option name="mobileSdkAppId" value="1:299061567454:android:c2bb2696726b46d056474f" />
+                  <option name="projectId" value="ai-image-gen-d0435" />
+                  <option name="projectNumber" value="299061567454" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

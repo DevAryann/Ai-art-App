@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -42,6 +43,13 @@ android {
 dependencies {
     // 1. Icons (Extended set)
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    // Import the Firebase BoM (Bill of Materials)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+
+    // Add the products you need
+    implementation("com.google.firebase:firebase-firestore") // Database
+    implementation("com.google.firebase:firebase-storage")   // Image Storage
+    implementation("com.google.firebase:firebase-auth")      // Login
 
     // 2. Google Fonts Support
     implementation("androidx.compose.ui:ui-text-google-fonts:1.6.0")
