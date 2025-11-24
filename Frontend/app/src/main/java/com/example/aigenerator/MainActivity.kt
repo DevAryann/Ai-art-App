@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -177,7 +178,21 @@ fun MainScreen() {
             onValueChange = { promptText = it },
             label = { Text("Describe your image...") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+
+            trailingIcon = {
+                if (promptText.isNotEmpty()) {
+                    IconButton(onClick = { promptText = "" }) {
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.Clear,
+                            contentDescription = "Clear text",
+                            tint = Color.Gray
+                        )
+                    }
+                }
+            }
+
+
         )
 
         Spacer(modifier = Modifier.height(16.dp))
