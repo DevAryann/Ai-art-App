@@ -63,9 +63,8 @@ NOTE: For full functionality, the Python server needs access to the public inter
 
  🖼️ Demo & Live Functionality
  
- ![cat4](https://github.com/user-attachments/assets/31380c89-eac6-41a4-bcc6-87b5b4542105)
- ![WhatsApp Image 2025-11-26 at 20 52 31](https://github.com/user-attachments/assets/1346646b-412c-4d95-be9d-017b1f0d3e89)
-![WhatsApp Image 2025-11-26 at 20 52 30](https://github.com/user-attachments/assets/9b161730-ee4f-4281-851a-247e0d40140c)
+ ![cat4](https://github.com/user-attachments/assets/31380c89-eac6-41a4-bcc6-87b5b4542105) ![WhatsApp Image 2025-11-26 at 20 52 31](https://github.com/user-attachments/assets/1346646b-412c-4d95-be9d-017b1f0d3e89)
+
 
 
  
