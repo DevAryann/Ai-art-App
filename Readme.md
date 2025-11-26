@@ -61,8 +61,9 @@ NOTE: For full functionality, the Python server needs access to the public inter
      ```bash
      private const val BASE_URL = "[http://10.0.2.2:5000/](http://10.0.2.2:5000/)" 
 
-📂 Project Structure (Backend)
+### 📂 Project Structure (Backend)
 
+```text
 ├── backend/
 │   ├── app.py                  # Main Flask application and /generate endpoint
 │   ├── requirements.txt        # Python dependencies (Flask, Gunicorn, requests)
