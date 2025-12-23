@@ -1,58 +1,39 @@
 from flask import Flask, request, jsonify
-from urllib.parse import quote
+import requests
 import time
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return jsonify({
-        "status": "Online",
-        "message": "AI Server is ready!"
-    })
-
-
-@app.route('/health')
-def health():
-    return jsonify({
-        "status": "ok",
-        "timestamp": int(time.time())
-    })
+    return jsonify({"status": "Online", "message": "AI Server is ready!"})
 
 
 @app.route('/generate', methods=['POST'])
 def generate_image():
-    if not request.is_json:
-        return jsonify({
-            "status": "error",
-            "message": "Request must be JSON"
-        }), 400
 
-    data = request.get_json()
+    start_time = time.time()
+
+
+    data = request.json
     prompt = data.get('prompt', 'A cute robot painting a picture')
+    
+    print(f"--- Starting generation for prompt: {prompt} ---")
 
-    print(f"Received prompt: {prompt}")
-
-    encoded_prompt = quote(prompt)
+    clean_prompt = prompt.replace(" ", "%20")
+    
     seed = int(time.time())
+    image_url = f"https://image.pollinations.ai/prompt/{clean_prompt}?seed={seed}"
 
-    image_url = (
-        f"https://image.pollinations.ai/prompt/"
-        f"{encoded_prompt}?seed={seed}"
-    )
+ 
+    end_time = time.time()
+    duration = round(end_time - start_time, 2)
+    print(f"--- SUCCESS: Generation completed in {duration} seconds ---")
 
     return jsonify({
         "status": "success",
-        "prompt": prompt,
-        "image_url": image_url,
-        "seed": seed
+        "image_url": image_url
     })
 
-
 if __name__ == '__main__':
-    app.run(
-        debug=True,
-        port=5000,
-        host='0.0.0.0'
-    )
-    
+    app.run(debug=True, port=5000, host='0.0.0.0')
