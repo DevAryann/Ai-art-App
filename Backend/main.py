@@ -26,7 +26,7 @@ def home():
     """Health check endpoint to verify server status."""
     return jsonify({
         "status": "Online", 
-        "service": "Baba Art API Pro",
+        "service": "AI Art API ",
         "version": "1.2.0",
         "timestamp": time.ctime()
     })
